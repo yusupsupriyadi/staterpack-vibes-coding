@@ -77,9 +77,15 @@ else {
   if (-not (Get-Command git -ErrorAction SilentlyContinue)) { Die "butuh 'git' untuk mengunduh starterpack" }
   $TmpClone = Join-Path ([System.IO.Path]::GetTempPath()) ("sp-" + [Guid]::NewGuid().ToString('N').Substring(0,8))
   Info "mengunduh starterpack dari $RepoUrl ..."
-  if ($Ref) { & git clone --depth 1 --branch $Ref $RepoUrl $TmpClone *> $null }
-  else      { & git clone --depth 1 $RepoUrl $TmpClone *> $null }
-  if (($LASTEXITCODE -ne 0) -or -not (HasContent $TmpClone)) { Die "gagal clone repo starterpack" }
+  # git menulis progres ke stderr; di PS 5.1 dgn EAP=Stop itu jadi error terminating.
+  # Turunkan EAP sementara + --quiet, lalu andalkan $LASTEXITCODE.
+  $prevEAP = $ErrorActionPreference
+  $ErrorActionPreference = 'SilentlyContinue'
+  if ($Ref) { & git clone --quiet --depth 1 --branch $Ref $RepoUrl $TmpClone 2>&1 | Out-Null }
+  else      { & git clone --quiet --depth 1 $RepoUrl $TmpClone 2>&1 | Out-Null }
+  $cloneCode = $LASTEXITCODE
+  $ErrorActionPreference = $prevEAP
+  if (($cloneCode -ne 0) -or -not (HasContent $TmpClone)) { Die "gagal clone repo starterpack" }
   $Src = $TmpClone
 }
 
