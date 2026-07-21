@@ -1,0 +1,12 @@
+# Normalisasi line-ending lintas-OS agar installer & konten ter-checkout benar.
+* text=auto
+
+# Skrip shell HARUS LF, kalau tidak bash menolaknya di macOS/Linux.
+*.sh    text eol=lf
+
+# Skrip PowerShell aman dengan CRLF di Windows.
+*.ps1   text eol=crlf
+
+# Dokumen & konten skill: teks biasa (line-ending dinormalisasi otomatis).
+*.md    text
+*.json  text
