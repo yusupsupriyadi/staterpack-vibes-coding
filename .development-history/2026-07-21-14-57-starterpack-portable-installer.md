@@ -37,9 +37,19 @@ konten nyata.
 `bash tests/test-install.sh` → SEMUA LULUS (exit 0). `tests/test-install.ps1` →
 SEMUA LULUS (exit 0). `bash -n install.sh` OK; parse `install.ps1` OK. Smoke test
 fresh install: 15 skill, settings.json valid & identik sumber, blok CLAUDE.md rapi.
+End-to-end dari remote: `curl|bash` OK; `irm|iex` OK (lihat bugfix di bawah).
+
+## Bugfix penting (jalur clone PowerShell)
+E2E `irm|iex` awalnya gagal: `git clone` menulis progres ke stderr, dan di PS 5.1
+dengan `$ErrorActionPreference='Stop'` itu jadi `NativeCommandError` yang
+terminating → script mati sebelum clone dipakai. Tes `-Local` tak menangkapnya
+karena tak menyentuh jalur clone. Fix (commit terpisah): turunkan EAP di sekitar
+git + `--quiet` + `2>&1 | Out-Null` + cek `$LASTEXITCODE`. Terverifikasi lewat
+`irm|iex` ke URL raw ter-pin SHA: exit 0, 15 skill, settings valid, penanda ADA.
 
 ## Keterbatasan / tindak lanjut
 - Lisensi upstream skill belum terverifikasi (tidak ada file lisensi di sumber) —
   dicatat di `NOTICE.md`.
-- One-liner `curl|bash` / `irm|iex` baru bisa diuji end-to-end setelah push (butuh
-  repo publik & file mentah di `master`).
+- Raw `master` (`raw.githubusercontent.com`) punya cache CDN ±5 menit; setelah
+  push, one-liner lewat URL `master` ikut ter-update setelah cache kedaluwarsa
+  (sudah terbukti benar via URL ter-pin SHA).
